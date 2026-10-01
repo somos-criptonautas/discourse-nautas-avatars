@@ -1,0 +1,17 @@
+{
+  "name": "nautas-avatars",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.11.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "boring-avatars": "^2.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
