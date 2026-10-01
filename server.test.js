@@ -53,6 +53,16 @@ test('same username produces identical bytes', async () => {
   assert.deepEqual(a.body, b.body);
 });
 
+test('notionists-neutral returns an SVG image, deterministic per username', async () => {
+  const r = await get('/notionists-neutral/128/alice');
+  assert.equal(r.status, 200);
+  assert.match(r.headers['content-type'], /image\/svg\+xml/);
+  assert.match(r.body.toString('utf8'), /<svg/);
+
+  const again = await get('/notionists-neutral/128/alice');
+  assert.deepEqual(r.body, again.body);
+});
+
 test('bad size returns 400', async () => {
   const tooSmall = await get('/beam/8/alice');
   const tooBig = await get('/beam/9999/alice');

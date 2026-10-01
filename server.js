@@ -2,11 +2,15 @@ import http from 'node:http';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Avatar from 'boring-avatars';
+import { createAvatar } from '@dicebear/core';
+import * as notionistsNeutral from '@dicebear/notionists-neutral';
 
 const PORT = Number(process.env.PORT) || 8787;
 const HOST = process.env.HOST || '127.0.0.1';
 
-const VARIANTS = new Set(['beam', 'marble', 'pixel', 'sunset', 'ring', 'bauhaus']);
+const BORING_VARIANTS = new Set(['beam', 'marble', 'pixel', 'sunset', 'ring', 'bauhaus']);
+const DICEBEAR_VARIANTS = new Set(['notionists-neutral']);
+const VARIANTS = new Set([...BORING_VARIANTS, ...DICEBEAR_VARIANTS]);
 // Brand Color System v0.3
 const PALETTE = ['#462C6D', '#B24B38', '#14110F', '#E8E6E1', '#7E7973'];
 
@@ -17,6 +21,10 @@ const SVG_HEADERS = {
 };
 
 function render(variant, size, username) {
+  if (DICEBEAR_VARIANTS.has(variant)) {
+    // DEFAULT style options — only seed + size, per the task's requirement.
+    return createAvatar(notionistsNeutral, { seed: username, size }).toString();
+  }
   const svg = renderToStaticMarkup(
     React.createElement(Avatar, { variant, size, name: username, colors: PALETTE, square: false }),
   );

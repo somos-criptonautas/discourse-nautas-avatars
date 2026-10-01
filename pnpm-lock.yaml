@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@dicebear/core':
+        specifier: 9.4.3
+        version: 9.4.3
+      '@dicebear/notionists-neutral':
+        specifier: 9.4.3
+        version: 9.4.3(@dicebear/core@9.4.3)
       boring-avatars:
         specifier: ^2.0.1
         version: 2.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -19,6 +25,19 @@ importers:
         version: 18.3.1(react@18.3.1)
 
 packages:
+
+  '@dicebear/core@9.4.3':
+    resolution: {integrity: sha512-9ITrQI57k3p5hKuU8HZJ1d0kPdrmTKEJDOdlKQ8CpaChbtmnD1R+dtWmNz5IesYThXM8F64pJ0ZvJ2rsY8Hciw==}
+    engines: {node: '>=18.0.0'}
+
+  '@dicebear/notionists-neutral@9.4.3':
+    resolution: {integrity: sha512-ldp4fUkRWvizn6FIUYDwcK0d7hQEaUKld8n/Owgs2J/MgowjjbnDKgD884OFMjGN6VNcTqlVQXe6ReReQaHFpQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@dicebear/core': ^9.0.0
+
+  '@types/json-schema@7.0.15':
+    resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
   boring-avatars@2.0.4:
     resolution: {integrity: sha512-xhZO/w/6aFmRfkaWohcl2NfyIy87gK5SBbys8kctZeTGF1Apjpv/10pfUuv+YEfVPkESU/h2Y6tt/Dwp+bIZPw==}
@@ -46,6 +65,16 @@ packages:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
 
 snapshots:
+
+  '@dicebear/core@9.4.3':
+    dependencies:
+      '@types/json-schema': 7.0.15
+
+  '@dicebear/notionists-neutral@9.4.3(@dicebear/core@9.4.3)':
+    dependencies:
+      '@dicebear/core': 9.4.3
+
+  '@types/json-schema@7.0.15': {}
 
   boring-avatars@2.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:

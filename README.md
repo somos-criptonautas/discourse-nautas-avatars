@@ -1,21 +1,28 @@
 # nautas-avatars
 
-Self-hosted Boring Avatars generator for Discourse's `external_system_avatars_url`.
+Self-hosted avatar generator for Discourse's `external_system_avatars_url`.
 Replaces letter avatars without sending usernames to any third party (everything
 renders locally, server-side, with no outbound requests).
 
 ## What it does
 
-`GET /:variant/:size/:username` returns a deterministic SVG avatar generated with
-[boring-avatars](https://www.npmjs.com/package/boring-avatars), rendered server-side
-via `react-dom/server`'s `renderToStaticMarkup` (no browser, no canvas).
+`GET /:variant/:size/:username` returns a deterministic SVG avatar, rendered
+server-side (no browser, no canvas, no calls to any third-party avatar API).
 
-- `variant`: one of `beam`, `marble`, `pixel`, `sunset`, `ring`, `bauhaus`. Anything else → 400.
+- `variant`: one of `beam`, `marble`, `pixel`, `sunset`, `ring`, `bauhaus` (all
+  [boring-avatars](https://www.npmjs.com/package/boring-avatars), via
+  `react-dom/server`'s `renderToStaticMarkup`), or `notionists-neutral` (via
+  [`@dicebear/core`](https://www.npmjs.com/package/@dicebear/core) +
+  [`@dicebear/notionists-neutral`](https://www.npmjs.com/package/@dicebear/notionists-neutral),
+  default style options — only `seed` (= username) and `size` are passed). Anything
+  else → 400.
 - `size`: integer 16–512. Anything else → 400.
-- `username`: URL-decoded, max 60 chars, used only as the hash seed (never logged). Anything else → 400.
+- `username`: URL-decoded, max 60 chars, used only as the hash/seed (never logged). Anything else → 400.
 - Any other path, or a trailing slash → 404. Non-GET/HEAD → 405.
-- Palette is fixed to the brand Color System v0.3: `#462C6D`, `#B24B38`, `#14110F`, `#E8E6E1`, `#7E7973`.
-- `square: false` — see "square vs circle" below.
+- Boring Avatars palette is fixed to the brand Color System v0.3: `#462C6D`, `#B24B38`,
+  `#14110F`, `#E8E6E1`, `#7E7973`. `notionists-neutral` uses its own default palette
+  (not overridden, per the "default preset" requirement).
+- `square: false` for boring-avatars — see "square vs circle" below.
 
 ## Run locally
 
@@ -43,7 +50,8 @@ node --test
 ```
 
 Covers: valid request → image with correct `Content-Type`; same username → identical
-bytes (determinism); bad size/variant/username → 400; unknown route/trailing slash → 404.
+bytes (determinism, both for `beam` and for `notionists-neutral`); bad
+size/variant/username → 400; unknown route/trailing slash → 404.
 
 ## Discourse settings
 
@@ -106,6 +114,24 @@ sufficient. Risk accepted: very old email clients that don't render inline SVG
 (e.g. legacy desktop Outlook) will just show a broken/missing image for the avatar in
 digest emails — graceful degradation, not a functional break. Add `@resvg/resvg-js` and
 rasterize to PNG later if that's measured to matter.
+
+## `notionists-neutral` licence
+
+Checked `node_modules/@dicebear/notionists-neutral`'s own source header and bundled
+README (DiceBear ships the licence info inline, not as a separate `LICENSE` file in
+this package):
+
+- **Code**: MIT (`@dicebear/core` and `@dicebear/notionists-neutral` packages, copyright
+  Florian Körner).
+- **Design/artwork**: "Notionists" by Zoish (<https://heyzoish.gumroad.com/l/notionists>),
+  licensed **CC0 1.0** (public domain dedication,
+  <https://creativecommons.org/publicdomain/zero/1.0/>). The DiceBear style is a remix
+  of the original. CC0 means no attribution is legally required, but DiceBear credits
+  the original artist anyway (see <https://www.dicebear.com/licenses> for the full
+  overview) — this project does the same, here.
+
+Both licences permit this use (self-hosted, no code redistribution beyond the npm
+dependency itself) with no restriction.
 
 ## Square vs circle
 
