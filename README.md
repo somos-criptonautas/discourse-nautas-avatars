@@ -1,8 +1,8 @@
 # discourse-nautas-avatars
 
-Maintained by [Criptonautas](https://criptonautas.co). Not affiliated with or endorsed by
-Discourse (Civilized Discourse Construction Kit, Inc.); it only plugs into Discourse's
-`external_system_avatars_url` setting.
+**ENGLISH** | [ESPAÑOL](README.es.md)
+
+Maintained by Criptonautas. Not affiliated with or endorsed by Discourse (Civilized Discourse Construction Kit, Inc.).
 
 Self-hosted avatar generator for Discourse's `external_system_avatars_url`.
 Replaces letter avatars without sending usernames to any third party (everything
@@ -119,10 +119,10 @@ sufficient. Risk accepted: very old email clients that don't render inline SVG
 digest emails — graceful degradation, not a functional break. Add `@resvg/resvg-js` and
 rasterize to PNG later if that's measured to matter.
 
-## `notionists-neutral` licence
+## `notionists-neutral` license
 
 Checked `node_modules/@dicebear/notionists-neutral`'s own source header and bundled
-README (DiceBear ships the licence info inline, not as a separate `LICENSE` file in
+README (DiceBear ships the license info inline, not as a separate `LICENSE` file in
 this package):
 
 - **Code**: MIT (`@dicebear/core` and `@dicebear/notionists-neutral` packages, copyright
@@ -134,7 +134,7 @@ this package):
   the original artist anyway (see <https://www.dicebear.com/licenses> for the full
   overview) — this project does the same, here.
 
-Both licences permit this use (self-hosted, no code redistribution beyond the npm
+Both licenses permit this use (self-hosted, no code redistribution beyond the npm
 dependency itself) with no restriction.
 
 ## Square vs circle
@@ -154,6 +154,8 @@ Run it behind your existing reverse proxy on its own hostname (e.g. `avatars.exa
 → `127.0.0.1:8787`), with long-lived caching and access logs off — request paths contain
 usernames.
 
-## Licence
+## License
 
-MIT, see `LICENSE`. Avatar styles keep their own licences (above).
+MIT. See [LICENSE](LICENSE). Avatar styles keep their own licenses (above).
+
+Text of this README under [CC BY-NC-SA 4.0](CC-BY-NC-SA-4.0.txt).
