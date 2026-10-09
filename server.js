@@ -22,7 +22,7 @@ const SVG_HEADERS = {
 
 function render(variant, size, username) {
   if (DICEBEAR_VARIANTS.has(variant)) {
-    // DEFAULT style options — only seed + size, per the task's requirement.
+    // Style defaults: only seed and size are set.
     return createAvatar(notionistsNeutral, { seed: username, size }).toString();
   }
   const svg = renderToStaticMarkup(

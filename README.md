@@ -1,4 +1,8 @@
-# nautas-avatars
+# discourse-nautas-avatars
+
+Maintained by [Criptonautas](https://criptonautas.co). Not affiliated with or endorsed by
+Discourse (Civilized Discourse Construction Kit, Inc.); it only plugs into Discourse's
+`external_system_avatars_url` setting.
 
 Self-hosted avatar generator for Discourse's `external_system_avatars_url`.
 Replaces letter avatars without sending usernames to any third party (everything
@@ -21,7 +25,7 @@ server-side (no browser, no canvas, no calls to any third-party avatar API).
 - Any other path, or a trailing slash → 404. Non-GET/HEAD → 405.
 - Boring Avatars palette is fixed to the brand Color System v0.3: `#462C6D`, `#B24B38`,
   `#14110F`, `#E8E6E1`, `#7E7973`. `notionists-neutral` uses its own default palette
-  (not overridden, per the "default preset" requirement).
+  (not overridden).
 - `square: false` for boring-avatars — see "square vs circle" below.
 
 ## Run locally
@@ -35,8 +39,8 @@ curl -s http://127.0.0.1:8787/beam/128/satoshi -o avatar.svg
 ## Run in Docker
 
 ```sh
-docker build -t nautas-avatars .
-docker run --rm -p 127.0.0.1:8787:8787 nautas-avatars
+docker build -t discourse-nautas-avatars .
+docker run --rm -p 127.0.0.1:8787:8787 discourse-nautas-avatars
 ```
 
 The container binds `0.0.0.0:8787` internally (set via `ENV HOST` in the Dockerfile);
@@ -137,15 +141,19 @@ dependency itself) with no restriction.
 
 Discourse already clips avatars to a circle with CSS (`border-radius: 50%` on
 `.avatar`), so a square source image works fine — this is why `square: false` was kept
-(matches the request's palette spec) rather than forced to `true`.
+rather than forced to `true`.
 
 ## Privacy
 
 The server never logs usernames or request paths — only HTTP status and response time
 per request (see `server.js`). It makes no outbound network calls of any kind.
 
-## Nginx
+## Reverse proxy
 
-Not committed here (see project instructions). A reverse-proxy snippet for
-`avatars.criptonautas.co` → `127.0.0.1:8787` was given in the task's final report
-instead.
+Run it behind your existing reverse proxy on its own hostname (e.g. `avatars.example.com`
+→ `127.0.0.1:8787`), with long-lived caching and access logs off — request paths contain
+usernames.
+
+## Licence
+
+MIT, see `LICENSE`. Avatar styles keep their own licences (above).
