@@ -31,7 +31,7 @@ function render(variant, size, username) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n${svg}`;
 }
 
-// ponytail: path parsed by hand instead of a router dep — one route, not worth one.
+// One route, so the path is parsed by hand instead of pulling in a router.
 function handle(req, res) {
   const start = process.hrtime.bigint();
   let status = 404;
