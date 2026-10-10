@@ -12,10 +12,10 @@ const VARIANTS = new Set(['patch', 'beam', 'marble', 'pixel', 'sunset', 'ring', 
 // Brand Color System v0.3: the accents for the glyph, the light surfaces behind it.
 const INKS = ['#462C6D', '#B24B38', '#1F7A5C'];
 const PAPERS = ['#E8E6E1', '#EFEAF6'];
-// The 7x7 glyph sits in an 11x11 field: its corners stay inside the circle Discourse crops
-// avatars to (half-diagonal 4.95 < radius 5.5).
+// The 7x7 glyph sits in a 12x12 field: its corners keep clear of the circle Discourse crops
+// avatars to and of the theme's border (half-diagonal 4.95 against radius 6: about 4px at 48px).
 const GRID = 7;
-const FIELD = 11;
+const FIELD = 12;
 const OFFSET = (FIELD - GRID) / 2;
 // Of the 49 cells, so no patch is a near-empty dot or a near-solid block.
 export const MIN_CELLS = 18;
@@ -62,12 +62,17 @@ export function patch(username) {
   const bg = ground === 2 ? ink : PAPERS[ground];
   const fg = ground === 2 ? PAPERS[0] : ink;
 
-  const d = cells(bits)
-    .map(([x, y]) => `M${x + OFFSET} ${y + OFFSET}h1v1h-1z`)
-    .join('');
+  // Centre what is drawn, not the grid: a glyph with an empty top or bottom row otherwise
+  // sits visibly off-centre. Mirroring already centres it across. The shift can be half a
+  // cell, so the field is drawn at twice the grid's resolution to keep every edge whole.
+  const glyph = cells(bits);
+  const ys = glyph.map(([, y]) => y);
+  const dy = (GRID - (Math.max(...ys) - Math.min(...ys) + 1)) / 2 - Math.min(...ys);
+  const d = glyph.map(([x, y]) => `M${(x + OFFSET) * 2} ${(y + OFFSET + dy) * 2}h2v2h-2z`).join('');
+  const side = FIELD * 2;
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FIELD} ${FIELD}" shape-rendering="crispEdges">` +
-    `<rect width="${FIELD}" height="${FIELD}" fill="${bg}"/><path fill="${fg}" d="${d}"/></svg>`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${side} ${side}" shape-rendering="crispEdges">` +
+    `<rect width="${side}" height="${side}" fill="${bg}"/><path fill="${fg}" d="${d}"/></svg>`
   );
 }
 

@@ -67,8 +67,11 @@ test('patches keep their density in range and tell users apart', () => {
   const seen = new Set();
   for (let i = 0; i < 2000; i++) {
     const svg = patch(`user${i}`);
-    const n = (svg.match(/h1v1h-1z/g) || []).length;
+    const n = (svg.match(/h2v2h-2z/g) || []).length;
     assert.ok(n >= MIN_CELLS && n <= MAX_CELLS, `user${i}: ${n} cells`);
+    // Drawn part centred top to bottom: equal margins above and below, in field units.
+    const ys = [...svg.matchAll(/M\d+ (\d+)h2/g)].map((m) => Number(m[1]));
+    assert.equal(Math.min(...ys) + Math.max(...ys) + 2, 24, `user${i} off-centre`);
     seen.add(svg);
   }
   assert.ok(seen.size > 1990, `only ${seen.size} distinct patches in 2000`);

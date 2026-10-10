@@ -128,7 +128,7 @@ The patch is this project's own design, under the same MIT licence as the code.
 ## Square vs circle
 
 Discourse clips avatars to a circle with CSS (`border-radius: 50%` on `.avatar`). The
-glyph sits in an 11×11 field so its corners stay inside that circle; the same image works
+glyph sits in a 12×12 field so its corners keep clear of that circle and its border; the same image works
 square if the theme drops the radius.
 
 The border and hard shadow are the theme's, not the image's: one rule for every avatar,

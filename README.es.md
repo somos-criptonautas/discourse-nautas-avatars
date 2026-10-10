@@ -128,7 +128,7 @@ El parche es un diseño propio de este proyecto, bajo la misma licencia MIT que 
 ## Cuadrado o círculo
 
 Discourse recorta los avatares en círculo con CSS (`border-radius: 50%` en `.avatar`). El
-glifo va en un campo de 11×11 para que sus esquinas queden dentro de ese círculo; la misma
+glifo va en un campo de 12×12 para que sus esquinas queden lejos de ese círculo y de su borde; la misma
 imagen sirve cuadrada si el tema quita el radio.
 
 El borde y la sombra dura son del tema, no de la imagen: una sola regla para todos los
