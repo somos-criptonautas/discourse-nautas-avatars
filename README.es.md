@@ -13,27 +13,31 @@ renderiza en local, en el servidor, sin peticiones salientes).
 `GET /:variant/:size/:username` devuelve un avatar SVG determinista, renderizado en el
 servidor (sin navegador, sin canvas, sin llamadas a ninguna API de avatares de terceros).
 
-- `variant`: uno de `beam`, `marble`, `pixel`, `sunset`, `ring`, `bauhaus` (todos de
-  [boring-avatars](https://www.npmjs.com/package/boring-avatars), mediante
-  `renderToStaticMarkup` de `react-dom/server`), o `notionists-neutral` (mediante
-  [`@dicebear/core`](https://www.npmjs.com/package/@dicebear/core) +
-  [`@dicebear/notionists-neutral`](https://www.npmjs.com/package/@dicebear/notionists-neutral),
-  con las opciones de estilo por defecto: solo se pasan `seed` (= nombre de usuario) y `size`).
+- `variant`: `patch`, el parche de misión de Criptonautas: un glifo de píxeles simétrico
+  de 7×7 sobre un fondo plano, ambos derivados del SHA-256 del nombre de usuario. Los
+  nombres de los sets retirados (`beam`, `marble`, `pixel`, `sunset`, `ring`, `bauhaus`,
+  `notionists-neutral`) siguen respondiendo, con el parche, para que los avatares no se
+  rompan mientras el ajuste de Discourse pasa a `/patch/`; se quitan cuando lo haya hecho.
   Cualquier otro valor → 400.
 - `size`: entero entre 16 y 512. Cualquier otro valor → 400.
 - `username`: decodificado de la URL, máximo 60 caracteres, usado solo como hash/semilla (nunca se registra). Cualquier otro valor → 400.
 - Cualquier otra ruta, o una barra final → 404. Métodos distintos de GET/HEAD → 405.
-- La paleta de Boring Avatars está fijada al Color System v0.3 de la marca: `#462C6D`, `#B24B38`,
-  `#14110F`, `#E8E6E1`, `#7E7973`. `notionists-neutral` usa su propia paleta por defecto
-  (sin sobrescribir).
-- `square: false` para boring-avatars; ver "Cuadrado o círculo" más abajo.
+- Colores del Color System v0.3 de la marca: el glifo en `#462C6D`, `#B24B38` o
+  `#1F7A5C`, sobre papel `#E8E6E1`, lavanda `#EFEAF6`, o el propio acento bajo un glifo
+  papel: 9 combinaciones repartidas de forma pareja, así dos personas en un mismo hilo
+  rara vez coinciden.
+- Cada glifo ocupa entre 18 y 31 de sus 49 celdas: nunca un punto casi vacío ni un bloque
+  casi lleno.
+- Plano a propósito: la imagen no lleva borde ni sombra. Los dibuja el tema del foro con
+  CSS, así las fotos subidas llevan el mismo marco (ver "Cuadrado o círculo").
+- Sin dependencias: solo `http` y `crypto` de Node.
 
 ## Ejecutar en local
 
 ```sh
 pnpm install
 node server.js            # PORT=8787 HOST=127.0.0.1 por defecto
-curl -s http://127.0.0.1:8787/beam/128/satoshi -o avatar.svg
+curl -s http://127.0.0.1:8787/patch/128/satoshi -o avatar.svg
 ```
 
 ## Ejecutar en Docker
@@ -53,15 +57,16 @@ node --test
 ```
 
 Cubre: petición válida → imagen con el `Content-Type` correcto; mismo nombre de usuario → bytes
-idénticos (determinismo, tanto para `beam` como para `notionists-neutral`); tamaño, variante o
-nombre de usuario inválidos → 400; ruta desconocida o barra final → 404.
+idénticos; los nombres de los sets retirados responden con el parche; en 2000 nombres de
+usuario cada glifo queda dentro de su rango de densidad y los parches son distintos; tamaño,
+variante o nombre de usuario inválidos → 400; ruta desconocida o barra final → 404.
 
 ## Ajustes de Discourse
 
 Configura (Admin → Ajustes → busca "avatar"):
 
 ```
-external_system_avatars_url = https://avatars.criptonautas.co/beam/{size}/{username}
+external_system_avatars_url = https://avatars.criptonautas.co/patch/{size}/{username}
 ```
 
 Discourse sustituye `{size}` y `{username}` (y `{color}`/`{first_letter}`, que aquí no se usan)
@@ -116,28 +121,18 @@ Outlook de escritorio heredado) mostrarán una imagen rota o vacía para el avat
 resumen; es una degradación aceptable, no un fallo funcional. Añadir `@resvg/resvg-js` y
 rasterizar a PNG más adelante si se mide que importa.
 
-## Licencia de `notionists-neutral`
+## Diseño
 
-Revisados la cabecera del código fuente y el README incluido en
-`node_modules/@dicebear/notionists-neutral` (DiceBear incluye la información de licencia en línea,
-no como un archivo `LICENSE` aparte en este paquete):
-
-- **Código**: MIT (paquetes `@dicebear/core` y `@dicebear/notionists-neutral`, copyright
-  Florian Körner).
-- **Diseño/ilustración**: "Notionists" de Zoish (<https://heyzoish.gumroad.com/l/notionists>),
-  con licencia **CC0 1.0** (dedicación al dominio público,
-  <https://creativecommons.org/publicdomain/zero/1.0/>). El estilo de DiceBear es una remezcla
-  del original. CC0 implica que legalmente no hace falta atribución, pero DiceBear acredita igual
-  a la artista original (ver <https://www.dicebear.com/licenses> para el resumen completo); este
-  proyecto hace lo mismo, aquí.
-
-Ambas licencias permiten este uso (autoalojado, sin redistribuir código más allá de la propia
-dependencia de npm) sin restricciones.
+El parche es un diseño propio de este proyecto, bajo la misma licencia MIT que el código.
 
 ## Cuadrado o círculo
 
-Discourse ya recorta los avatares en círculo con CSS (`border-radius: 50%` en `.avatar`), así que
-una imagen cuadrada funciona bien; por eso se mantuvo `square: false` en lugar de forzarlo a `true`.
+Discourse recorta los avatares en círculo con CSS (`border-radius: 50%` en `.avatar`). El
+glifo va en un campo de 11×11 para que sus esquinas queden dentro de ese círculo; la misma
+imagen sirve cuadrada si el tema quita el radio.
+
+El borde y la sombra dura son del tema, no de la imagen: una sola regla para todos los
+avatares, subidos o generados, y `box-shadow` sigue el círculo en vez de quedar recortada.
 
 ## Privacidad
 
@@ -152,6 +147,6 @@ peticiones contienen nombres de usuario.
 
 ## Licencia
 
-MIT. Consulta [LICENSE](LICENSE). Los estilos de avatar conservan sus propias licencias (arriba).
+MIT. Consulta [LICENSE](LICENSE).
 
 Texto de este README bajo [CC BY-NC-SA 4.0](CC-BY-NC-SA-4.0.txt).

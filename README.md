@@ -13,27 +13,28 @@ renders locally, server-side, with no outbound requests).
 `GET /:variant/:size/:username` returns a deterministic SVG avatar, rendered
 server-side (no browser, no canvas, no calls to any third-party avatar API).
 
-- `variant`: one of `beam`, `marble`, `pixel`, `sunset`, `ring`, `bauhaus` (all
-  [boring-avatars](https://www.npmjs.com/package/boring-avatars), via
-  `react-dom/server`'s `renderToStaticMarkup`), or `notionists-neutral` (via
-  [`@dicebear/core`](https://www.npmjs.com/package/@dicebear/core) +
-  [`@dicebear/notionists-neutral`](https://www.npmjs.com/package/@dicebear/notionists-neutral),
-  default style options — only `seed` (= username) and `size` are passed). Anything
-  else → 400.
+- `variant`: `patch`, the Criptonautas mission patch: a symmetric 7×7 pixel glyph on a
+  flat field, both derived from the SHA-256 of the username. The retired set names
+  (`beam`, `marble`, `pixel`, `sunset`, `ring`, `bauhaus`, `notionists-neutral`) still
+  answer, with the patch, so avatars keep working while the Discourse setting moves to
+  `/patch/`; they go once it has. Anything else → 400.
 - `size`: integer 16–512. Anything else → 400.
 - `username`: URL-decoded, max 60 chars, used only as the hash/seed (never logged). Anything else → 400.
 - Any other path, or a trailing slash → 404. Non-GET/HEAD → 405.
-- Boring Avatars palette is fixed to the brand Color System v0.3: `#462C6D`, `#B24B38`,
-  `#14110F`, `#E8E6E1`, `#7E7973`. `notionists-neutral` uses its own default palette
-  (not overridden).
-- `square: false` for boring-avatars — see "square vs circle" below.
+- Colours from the brand Color System v0.3: the glyph in one of `#462C6D`, `#B24B38`,
+  `#1F7A5C`, on paper `#E8E6E1`, lavender `#EFEAF6`, or the accent itself under a paper
+  glyph — 9 colourings, evenly spread, so two posters in a thread rarely match.
+- Every glyph fills 18–31 of its 49 cells: never a near-empty dot or a near-solid block.
+- Flat on purpose: no border or shadow in the image. The forum theme draws the frame
+  with CSS, so uploaded photos get the same one (see "Square vs circle").
+- No dependencies: Node's own `http` and `crypto`.
 
 ## Run locally
 
 ```sh
 pnpm install
 node server.js            # PORT=8787 HOST=127.0.0.1 by default
-curl -s http://127.0.0.1:8787/beam/128/satoshi -o avatar.svg
+curl -s http://127.0.0.1:8787/patch/128/satoshi -o avatar.svg
 ```
 
 ## Run in Docker
@@ -54,15 +55,16 @@ node --test
 ```
 
 Covers: valid request → image with correct `Content-Type`; same username → identical
-bytes (determinism, both for `beam` and for `notionists-neutral`); bad
-size/variant/username → 400; unknown route/trailing slash → 404.
+bytes; the retired set names answer with the patch; across 2000 usernames every glyph
+stays within its density range and the patches are distinct; bad size/variant/username
+→ 400; unknown route/trailing slash → 404.
 
 ## Discourse settings
 
 Set (Admin → Settings → search "avatar"):
 
 ```
-external_system_avatars_url = https://avatars.criptonautas.co/beam/{size}/{username}
+external_system_avatars_url = https://avatars.criptonautas.co/patch/{size}/{username}
 ```
 
 Discourse substitutes `{size}` and `{username}` (and `{color}`/`{first_letter}`, unused
@@ -119,29 +121,18 @@ sufficient. Risk accepted: very old email clients that don't render inline SVG
 digest emails — graceful degradation, not a functional break. Add `@resvg/resvg-js` and
 rasterize to PNG later if that's measured to matter.
 
-## `notionists-neutral` license
+## Design
 
-Checked `node_modules/@dicebear/notionists-neutral`'s own source header and bundled
-README (DiceBear ships the license info inline, not as a separate `LICENSE` file in
-this package):
-
-- **Code**: MIT (`@dicebear/core` and `@dicebear/notionists-neutral` packages, copyright
-  Florian Körner).
-- **Design/artwork**: "Notionists" by Zoish (<https://heyzoish.gumroad.com/l/notionists>),
-  licensed **CC0 1.0** (public domain dedication,
-  <https://creativecommons.org/publicdomain/zero/1.0/>). The DiceBear style is a remix
-  of the original. CC0 means no attribution is legally required, but DiceBear credits
-  the original artist anyway (see <https://www.dicebear.com/licenses> for the full
-  overview) — this project does the same, here.
-
-Both licenses permit this use (self-hosted, no code redistribution beyond the npm
-dependency itself) with no restriction.
+The patch is this project's own design, under the same MIT licence as the code.
 
 ## Square vs circle
 
-Discourse already clips avatars to a circle with CSS (`border-radius: 50%` on
-`.avatar`), so a square source image works fine — this is why `square: false` was kept
-rather than forced to `true`.
+Discourse clips avatars to a circle with CSS (`border-radius: 50%` on `.avatar`). The
+glyph sits in an 11×11 field so its corners stay inside that circle; the same image works
+square if the theme drops the radius.
+
+The border and hard shadow are the theme's, not the image's: one rule for every avatar,
+uploaded or generated, and `box-shadow` follows the circle instead of being clipped by it.
 
 ## Privacy
 
@@ -156,6 +147,6 @@ usernames.
 
 ## License
 
-MIT. See [LICENSE](LICENSE). Avatar styles keep their own licenses (above).
+MIT. See [LICENSE](LICENSE).
 
 Text of this README under [CC BY-NC-SA 4.0](CC-BY-NC-SA-4.0.txt).

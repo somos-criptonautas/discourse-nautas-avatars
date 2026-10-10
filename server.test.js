@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import { once } from 'node:events';
 import { spawn } from 'node:child_process';
+import { patch, MIN_CELLS, MAX_CELLS } from './server.js';
 
 const PORT = 18787;
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -39,34 +40,44 @@ function get(path) {
 }
 
 test('valid request returns an SVG image', async () => {
-  const r = await get('/beam/128/alice');
+  const r = await get('/patch/128/alice');
   assert.equal(r.status, 200);
   assert.match(r.headers['content-type'], /image\/svg\+xml/);
   assert.match(r.headers['cache-control'], /immutable/);
   assert.equal(r.headers['x-content-type-options'], 'nosniff');
-  assert.match(r.body.toString('utf8'), /<svg/);
+  assert.match(r.body.toString('utf8'), /<svg width="128" height="128"/);
 });
 
 test('same username produces identical bytes', async () => {
-  const a = await get('/beam/128/alice');
-  const b = await get('/beam/128/alice');
+  const a = await get('/patch/128/alice');
+  const b = await get('/patch/128/alice');
   assert.deepEqual(a.body, b.body);
 });
 
-test('notionists-neutral returns an SVG image, deterministic per username', async () => {
-  const r = await get('/notionists-neutral/128/alice');
-  assert.equal(r.status, 200);
-  assert.match(r.headers['content-type'], /image\/svg\+xml/);
-  assert.match(r.body.toString('utf8'), /<svg/);
+test('retired set names still answer, with the patch', async () => {
+  const patchBody = (await get('/patch/64/alice')).body;
+  for (const old of ['beam', 'notionists-neutral']) {
+    const r = await get(`/${old}/64/alice`);
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body, patchBody);
+  }
+});
 
-  const again = await get('/notionists-neutral/128/alice');
-  assert.deepEqual(r.body, again.body);
+test('patches keep their density in range and tell users apart', () => {
+  const seen = new Set();
+  for (let i = 0; i < 2000; i++) {
+    const svg = patch(`user${i}`);
+    const n = (svg.match(/h1v1h-1z/g) || []).length;
+    assert.ok(n >= MIN_CELLS && n <= MAX_CELLS, `user${i}: ${n} cells`);
+    seen.add(svg);
+  }
+  assert.ok(seen.size > 1990, `only ${seen.size} distinct patches in 2000`);
 });
 
 test('bad size returns 400', async () => {
-  const tooSmall = await get('/beam/8/alice');
-  const tooBig = await get('/beam/9999/alice');
-  const notNumber = await get('/beam/abc/alice');
+  const tooSmall = await get('/patch/8/alice');
+  const tooBig = await get('/patch/9999/alice');
+  const notNumber = await get('/patch/abc/alice');
   assert.equal(tooSmall.status, 400);
   assert.equal(tooBig.status, 400);
   assert.equal(notNumber.status, 400);
@@ -78,12 +89,12 @@ test('bad variant returns 400', async () => {
 });
 
 test('overlong username returns 400', async () => {
-  const r = await get('/beam/128/' + 'a'.repeat(61));
+  const r = await get('/patch/128/' + 'a'.repeat(61));
   assert.equal(r.status, 400);
 });
 
 test('trailing slash and unknown routes return 404', async () => {
-  const trailing = await get('/beam/128/alice/');
+  const trailing = await get('/patch/128/alice/');
   const unknown = await get('/does/not/exist/at/all');
   const root = await get('/');
   assert.equal(trailing.status, 404);
