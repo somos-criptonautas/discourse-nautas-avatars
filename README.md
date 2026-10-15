@@ -37,16 +37,19 @@ node server.js            # PORT=8787 HOST=127.0.0.1 by default
 curl -s http://127.0.0.1:8787/patch/128/satoshi -o avatar.svg
 ```
 
-## Run in Docker
+## Run in Docker (production)
 
 ```sh
-docker build -t discourse-nautas-avatars .
-docker run --rm -p 127.0.0.1:8787:8787 discourse-nautas-avatars
+docker compose up -d --build
+curl -sI http://127.0.0.1:8787/patch/48/test | head -1   # HTTP/1.1 200 OK
 ```
 
-The container binds `0.0.0.0:8787` internally (set via `ENV HOST` in the Dockerfile);
-exposure to the host is controlled by the `-p` publish flag, same as any other
-containerized service.
+`compose.yaml` hardens the container: published on `127.0.0.1` only (the reverse proxy is
+the only way in), read-only filesystem, all Linux capabilities dropped,
+`no-new-privileges`, non-root user, memory/process/CPU limits so a request flood can't
+starve Discourse on the same host, a healthcheck and rotated logs.
+
+Update with `git pull && docker compose up -d --build`.
 
 ## Self-check
 
