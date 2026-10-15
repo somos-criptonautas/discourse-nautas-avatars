@@ -25,6 +25,8 @@ const SVG_HEADERS = {
   'Content-Type': 'image/svg+xml; charset=utf-8',
   'Cache-Control': 'public, max-age=31536000, immutable',
   'X-Content-Type-Options': 'nosniff',
+  // An SVG opened directly is a document: forbid scripts and external loads.
+  'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
 };
 
 // Left half plus the middle column (4 x 7 = 28 bits), mirrored, so every glyph is symmetric.
